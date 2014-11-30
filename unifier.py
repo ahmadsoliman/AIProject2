@@ -1,33 +1,6 @@
 import itertools
 from node import *
 
-'''
-class Function:
-    ATOM = 0
-    VAR = 1
-    FUNC = 2
-    def __init__(self, name, ftype, args=[]):
-        self.name = name
-        self.type = ftype
-        self.args = args
-
-    def eq(self, other):
-        if self.type != other.type or self.name != other.name:
-            return False
-        for arg1,arg2 in itertools.izip(self.args, other.args):
-            if not(arg1.eq(arg2)):
-                return False
-        return True
-
-    def humanize(self):
-        if self.type == Function.ATOM or self.type == Function.VAR:
-            return self.name
-        res = self.name + '('
-        for arg in self.args:
-            res += humanize(arg) + ','
-        return res[:-1] + ')'
-'''
-
 class solution:
     def __init__(self, f):
         self.found = f
