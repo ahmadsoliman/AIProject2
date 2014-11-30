@@ -1,3 +1,5 @@
+import itertools
+
 # fn(x) for all members x of l returns true
 def all_are(l, fn):
     return reduce(lambda acc, x: acc and fn(x), l, True)
@@ -15,6 +17,11 @@ class node(object):
         return self.kind == 'fn'
     def is_atom(self):
         return self.kind in ['const', 'var']
+    def is_const(self):
+        return self.kind == 'const'
+    def is_var(self):
+        return self.kind == 'var'
+
 
     def __init__(self, kind, *args):
         if kind not in self.kinds:
@@ -35,6 +42,26 @@ class node(object):
 
         # sanity check
         self.assert_consistency()
+
+
+    def eq(self, other):
+        if self.kind != other.kind or self.name != other.name or len(self.children) != len(other.children):
+            return False
+        for arg1,arg2 in itertools.izip(self.children, other.children):
+            if not arg1.eq(arg2):
+                return False
+        return True
+
+    def humanize(self):
+        if self.is_atom():
+            return self.name
+        # TODO
+        if not self.is_function():
+            return ''
+        res = self.name + '('
+        for arg in self.children:
+            res += arg.humanize() + ','
+        return res[:-1] + ')'
 
     def assert_consistency(self):
         if not self.is_consistent():
@@ -251,6 +278,7 @@ class node(object):
             return cf
         else:
             return [self]
+
 
 # NOTE destructive operation
 def standardize_clause_form(cf):
