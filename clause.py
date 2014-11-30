@@ -142,18 +142,18 @@ def to_cnf(root):
     for c in root.children:
         to_cnf(c)
 
-def clause_form(root):
+def cnf_to_clause_form(root):
     if root.kind == 'v':
         if all_are(root.children, lambda c: c.kind != '^'):
-            cf = [clause_form(c) for c in root.children]
+            cf = [cnf_to_clause_form(c) for c in root.children]
             return cf[0] + cf[1]
     elif root.kind == '^':
         cf = []
         for child in root.children:
             if child.kind == '^':
-                cf = cf + clause_form(child)
+                cf = cf + cnf_to_clause_form(child)
             else:
-                cf = cf + [clause_form(child)]
+                cf = cf + [cnf_to_clause_form(child)]
         return cf
     else:
         return [root]
@@ -181,39 +181,84 @@ def standardize_clause_form(cf):
                     used.append(v.name)
                 v.name = v.name + str(varn[v.name])
 
-orig = A('x',
+def fol_to_clause_form_cnf(root):
+    n = root.clone()
+    print "Converting %s to CNF\n" % n
+
+    for op in ['<=>', '==>', '~']:
+        print "Applying '%s' transformation" % op
+        normalize(n, op)
+        print "Result: %s\n" % n
+
+    print "Standardizing"
+    standardize(n)
+    print "Result: %s\n" % n
+
+    print "Skolemizing"
+    skolemize(n)
+    print "Result: %s\n" % n
+
+    print "Discarding universal quantifiers"
+    discard_universal_quantifiers(n)
+    print "Result: %s\n" % n
+
+    print "Converting to CNF"
+    to_cnf(n)
+    print "Result: %s\n" % n
+
+
+    print "Converting CNF to Clause Form"
+    cf = cnf_to_clause_form(n)
+    print "Result: %s\n" % cf
+
+    print "Standardizing Clause Form"
+    standardize_clause_form(cf)
+    print "Result: %s\n" % cf
+
+    print "----------------------- Done ------------------------"
+
+# example from lecture
+tests = []
+tests.append(
+A('x',
+    infix(
+        fn('P', var('x')),
+        '<=>',
         infix(
-            fn('P', var('x')),
-            '<=>',
+            fn('Q', var('x')),
+            '^',
+            E('y',
+                infix(
+                    fn('Q', var('y')),
+                    '^',
+                    fn('R', var('y'), var('x'))))))))
+
+tests.append(
+E('x',
+    infix(
+        fn('P', var('x')),
+        '^',
+        A('x',
             infix(
                 fn('Q', var('x')),
-                '^',
-                E('y',
-                    infix(
-                        fn('Q', var('y')),
-                        '^',
-                        fn('R', var('y'), var('x')))))))
+                '==>',
+                node('~', fn('P', var('x'))))))))
 
-n = orig.clone()
-print n
-for op in ['<=>', '==>', '~']:
-    normalize(n, op)
-    print n
+tests.append(
+A('x',
+    infix(
+        fn('P', var('x')),
+        '<=>',
+        infix(
+            fn('Q', var('x')),
+            '^',
+            E('y',
+                infix(
+                    fn('Q', var('y')),
+                    '^',
+                    fn('R', var('y'), var('x'))))))))
 
-standardize(n)
-print n
+for test in tests:
+    fol_to_clause_form_cnf(test)
 
-skolemize(n)
-print n
 
-discard_universal_quantifiers(n)
-print n
-
-to_cnf(n)
-print n
-
-cf = clause_form(n)
-print cf
-
-standardize_clause_form(cf)
-print cf
