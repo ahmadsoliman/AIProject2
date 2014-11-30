@@ -73,16 +73,43 @@ def occursIn(var, func):
             return True
     return False
 
-def test1():
-    return unify(fn('P', var('x'), fn('g',var('x')), fn('g',fn('f',const('a')))),fn('P', fn('f', var('u')), var('v'), var('v')))
+tests = []
+tests.append([
+    fn('P',
+        var('x'),
+        fn('g',var('x')),
+        fn('g',
+            fn('f', const('a')))),
 
-def test2():
-    return unify(fn('P', const('a'), var('y'), fn('f', var('y'))),fn('P', var('z'), var('z'), var('u')))
+    fn('P',
+        fn('f', var('u')),
+        var('v'),
+        var('v'))])
 
-def test3():
-    return unify(fn('f', var('x'), fn('g', var('x')), var('x')), fn('f', fn('g', var('u')), fn('g', fn('g', var('z'))), var('z')))
+tests.append([
+    fn('P',
+        const('a'),
+        var('y'),
+        fn('f', var('y'))),
 
-print unify(const('x'),const('a'))
-print unify(fn('P', var('x'), fn('g',var('x')), fn('g',fn('f',const('a')))),fn('P', fn('f', var('u')), var('v'), var('v')))
-print unify(fn('P', const('a'), var('y'), fn('f', var('y'))),fn('P', var('z'), var('z'), var('u')))
-print unify(fn('f', var('x'), fn('g', var('x')), var('x')), fn('f', fn('g', var('u')), fn('g', fn('g', var('z'))), var('z')))
+    fn('P',
+        var('z'),
+        var('z'),
+        var('u'))])
+
+tests.append([
+    fn('f',
+        var('x'),
+        fn('g', var('x')),
+        var('x')),
+    fn('f',
+        fn('g', var('u')),
+        fn('g',
+            fn('g', var('z'))),
+            var('z'))])
+
+for test in tests:
+    print "Unifying %s with %s" % tuple(test)
+    res = unify(*test)
+    print "Result: %s\n" % res
+
