@@ -113,3 +113,5 @@ for test in tests:
     res = unify(*test)
     print "Result: %s\n" % res
 
+def Unify(fol1, fol2):
+    unify(fol1, fol2, None)

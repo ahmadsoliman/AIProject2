@@ -216,6 +216,7 @@ def fol_to_clause_form_cnf(root):
     print "Result: %s\n" % cf
 
     print "----------------------- Done ------------------------"
+    return cf
 
 # example from lecture
 tests = []
@@ -261,4 +262,5 @@ A('x',
 for test in tests:
     fol_to_clause_form_cnf(test)
 
-
+def ClauseForm(root):
+    return fol_to_clause_form_cnf(root)
