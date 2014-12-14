@@ -64,8 +64,9 @@ def inArray(action, actions, sol):
         action1 = action1.clone(False)
         action1.preconds = [subst(sol, precond) for precond in action1.preconds]
         action1.effects = [subst(sol, effect) for effect in action1.effects]
-        newactions.append(action1)
-    return action in newactions
+        if action1 == action: return True
+
+    return False
 
 # operations O is an array of actions
 ops = []
