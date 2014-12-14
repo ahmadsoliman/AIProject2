@@ -14,6 +14,22 @@ class solution:
             res += "\n%s = %s" % pair
         return res
 
+    def merge(self, other):
+        if not self.found or not other.found:
+            return False
+        self.unified |= other.unified
+        return True
+
+    def consistent(self, other):
+        if self.found != other.found:
+            return False
+        for x,y in self.unified:
+            for a,b in other.unified:
+                if x==a and y!=b:
+                    return False
+        return True
+
+
 def unify(fol1, fol2, curSol = None):
     if curSol is None:
         curSol = solution(True)
@@ -107,9 +123,9 @@ tests.append([
         fn('g',
             fn('g', var('z'))),
             var('z'))])
-
+'''
 for test in tests:
     print "Unifying %s with %s" % tuple(test)
     res = unify(*test)
     print "Result: %s\n" % res
-
+'''
