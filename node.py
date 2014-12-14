@@ -43,6 +43,13 @@ class node(object):
         # sanity check
         self.assert_consistency()
 
+    def __eq__(self, other):
+        if self.kind != other.kind or self.name != other.name or len(self.children) != len(other.children):
+            return False
+        for arg1,arg2 in itertools.izip(self.children, other.children):
+            if not (arg1 == arg2):
+                return False
+        return True
 
     def eq(self, other):
         if self.kind != other.kind or self.name != other.name or len(self.children) != len(other.children):

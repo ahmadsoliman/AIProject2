@@ -2,9 +2,11 @@ import itertools
 from node import *
 
 class solution:
-    def __init__(self, f):
+    def __init__(self, f, unified=None):
+        if unified is None:
+            unified = set([])
+        self.unified = unified
         self.found = f
-        self.unified = set([])
 
     def __repr__(self):
         if not self.found:
@@ -13,6 +15,9 @@ class solution:
         for pair in self.unified:
             res += "\n%s = %s" % pair
         return res
+
+    def clone(self):
+        return solution(self.found, set([(p[0].clone(), p[1].clone()) for p in self.unified]))
 
     def merge(self, other):
         if not self.found or not other.found:

@@ -12,10 +12,10 @@ class action:
     def __repr__(self):
         return self.name.__repr__()
     def __eq__(self, other):
-        return self.name == other.name and self.preconds == other.preconds and self.effects == other.preconds
+        return self.name.eq(other.name) and sorted(self.preconds) == sorted(other.preconds) and sorted(self.effects) == sorted(other.preconds)
     def __hash__(self):
         return id(self)
-    def clone(self):
+    def clone(self, fresh=True):
         dic = {}
         def assignVar(vname):
             global counter
@@ -24,6 +24,7 @@ class action:
                 dic[vname] = "X%s" % counter
             return dic[vname]
         def replaceNames(node):
+            if not fresh: return node
             if node.kind == 'var':
                 node.name = assignVar(node.name)
             else:
@@ -35,6 +36,19 @@ class action:
         newpreconds = [replaceNames(p.clone()) for p in self.preconds]
         neweffects = [replaceNames(e.clone()) for e in self.effects]
         return action(newname, newpreconds, neweffects)
+
+def inArray(action, actions, sol):
+    print sol
+    action = action.clone(False)
+    action.preconds = [subst(sol, precond) for precond in action.preconds]
+    action.effects = [subst(sol, effect) for effect in action.effects]
+    newactions = []
+    for action1 in actions:
+        action1 = action1.clone(False)
+        action1.preconds = [subst(sol, precond) for precond in action1.preconds]
+        action1.effects = [subst(sol, effect) for effect in action1.effects]
+        newactions.append(action1)
+    return action in newactions
 
 # operations O is an array of actions
 ops = []
@@ -56,12 +70,15 @@ def POP(O, s0, g):
 # pi is a 4-tuple <A,L,Ord,B>
 
 def POP1(PI, agenda):
-    # expand pi tuple
+    # if counter > 20:
+    #     exit(0)
+
     A, L, Ord, B = PI
+    # expand pi tuple
     print 'A: ', A
-    print 'L: ', L
-    print 'Ord: ', Ord
-    print 'B: ', B
+    # print 'L: ', L
+    # print 'Ord: ', Ord
+    # print 'B: ', B
     print 'agenda: ', agenda
 
     # if (agenda = phi) then return pi
@@ -71,50 +88,46 @@ def POP1(PI, agenda):
     ai, pi = agenda.pop()
     # achievers = the set of operators achieving (ai, pi)
     # nondeterminsticly choose operator aj from achievers
-    aj = None
-    sol = None
-    found = False
     for op in ops:
         op = op.clone()
-        if found:
-            break
         for effect in op.effects:
             if effect.sameFn(pi):
+                A, L, Ord, B = PI
+                A = [a.clone(False) for a in A]
+                L = [(l[0].clone(False), l[1].clone(), l[2].clone(False)) for l in L]
+                Ord = set([(l[0].clone(False), l[1].clone(False)) for l in Ord])
+                B = B.clone()
+                PI = (A, L, Ord, B)
+
                 aj = op
+                print 'aj: : : : : : : :: : ', aj
                 sol = unify(effect, pi)
-                found = True
-                break
-    # if achievers = [] return failure
-    if aj is None:
-        return None
-    # subst(sol, aj)
-    #aj.name = subst(sol, aj.name)
-    #for precond in aj.preconds:
-    #    subst(sol, precond)
-    #for effect in aj.effects:
-    #    subst(sol, effect)
+                # if achievers = [] return failure
+                if aj is None:
+                    return None
 
-    # L = L union { aj --pi--> ai }
-    L.append((aj, pi, ai))
-    # update Ord with aj < ai
-    Ord.add((aj, ai))
-    # Update B with binding constraints of this link
-    if not B.consistent(sol):
-        return None
-    B.merge(sol)
+                # L = L union { aj --pi--> ai }
+                L.append((aj, pi, ai))
+                # update Ord with aj < ai
+                Ord.add((aj, ai))
+                # Update B with binding constraints of this link
+                if not B.consistent(sol):
+                    continue
+                B.merge(sol)
 
-    if not(aj in A):
-        # A = A union {aj}
-        A.append(aj)
-        # update Ord with a0 < aj and aj < aInf
-        Ord.add((a0, aj))
-        Ord.add((aj, aInf))
-        # add all preconditions of aj to the agenda
-        for precond in aj.preconds:
-            agenda.append((aj, precond))
-    # resolve new threats
-    #PI = RESOLVE_THREATS((A, L, Ord, B), aj, (aj, pi, ai))
-    return POP1(PI, agenda)
+                if not inArray(aj, A, B):
+                    # A = A union {aj}
+                    A.append(aj)
+                    # update Ord with a0 < aj and aj < aInf
+                    Ord.add((a0, aj))
+                    Ord.add((aj, aInf))
+                    # add all preconditions of aj to the agenda
+                    for precond in aj.preconds:
+                        agenda.append((aj, precond))
+                # resolve new threats
+                #PI = RESOLVE_THREATS((A, L, Ord, B), aj, (aj, pi, ai))
+                resPI = POP1(PI, agenda)
+                if resPI is not None: return resPI
 
 def RESOLVE_THREATS(PI, al, l):
     # expand pi tuple
