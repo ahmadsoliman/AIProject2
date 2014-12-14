@@ -269,6 +269,8 @@ O = [
 
 plan = POP(O, s0, g)
 
-print plan
+for p in plan:
+    print p
+    print
 
 print linearize(plan[2], plan[3])
