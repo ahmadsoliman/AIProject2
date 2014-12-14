@@ -2,6 +2,8 @@ import itertools
 from copy import *
 from unifier import *
 
+counter = 0
+
 class action:
     def __init__(self, name, preconds, effects):
         self.name = name
@@ -13,6 +15,26 @@ class action:
         return self.name == other.name and self.preconds == other.preconds and self.effects == other.preconds
     def __hash__(self):
         return id(self)
+    def clone(self):
+        dic = {}
+        def assignVar(vname):
+            global counter
+            if vname not in dic:
+                counter += 1
+                dic[vname] = "X%s" % counter
+            return dic[vname]
+        def replaceNames(node):
+            if node.kind == 'var':
+                node.name = assignVar(node.name)
+            else:
+                for c in node.children:
+                    replaceNames(c)
+            return node
+
+        newname = replaceNames(self.name.clone())
+        newpreconds = [replaceNames(p.clone()) for p in self.preconds]
+        neweffects = [replaceNames(e.clone()) for e in self.effects]
+        return action(newname, newpreconds, neweffects)
 
 # operations O is an array of actions
 ops = []
@@ -65,11 +87,11 @@ def POP1(PI, agenda):
     if aj is None:
         return None
     # subst(sol, aj)
-    aj.name = subst(sol, aj.name)
-    for precond in aj.preconds:
-        subst(sol, precond)
-    for effect in aj.effects:
-        subst(sol, effect)
+    #aj.name = subst(sol, aj.name)
+    #for precond in aj.preconds:
+    #    subst(sol, precond)
+    #for effect in aj.effects:
+    #    subst(sol, effect)
 
     # L = L union { aj --pi--> ai }
     L.append((aj, pi, ai))
