@@ -45,10 +45,15 @@ class action:
 def arrayEq(a1, a2):
     if len(a1)!=len(a2):
         return False
-    for b1,b2 in itertools.izip(a1,a2):
-        if not unify(b1, b2).found: return False
-    return True
+    for b1 in a1:
+        found = False
+        for b2 in a2:
+            if unify(b1, b2).found:
+                found = True
+                break
+        if not found: return False
 
+    return True
 
 def inArray(action, actions, sol):
     action = action.clone(False)
