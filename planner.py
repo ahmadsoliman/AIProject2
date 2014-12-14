@@ -75,6 +75,7 @@ def POP1(PI, agenda):
     sol = None
     found = False
     for op in ops:
+        op = op.clone()
         if found:
             break
         for effect in op.effects:
@@ -98,6 +99,8 @@ def POP1(PI, agenda):
     # update Ord with aj < ai
     Ord.add((aj, ai))
     # Update B with binding constraints of this link
+    if not B.consistent(sol):
+        return None
     B.merge(sol)
 
     if not(aj in A):
@@ -164,9 +167,9 @@ O = [
             [fn('At', var('Here'))],
             [fn('At', var('There')), neg(fn('At', var('Here')))]
         ),
-    action(fn('Buy', var('Store'), var('X')),
-            [fn('At', var('Store')), fn('Sells', var('Store'), var('X'))],
-            [fn('Have', var('X'))]
+    action(fn('Buy', var('Store'), var('Y')),
+            [fn('At', var('Store')), fn('Sells', var('Store'), var('Y'))],
+            [fn('Have', var('Y'))]
         )
 ]
 

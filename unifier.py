@@ -25,7 +25,7 @@ class solution:
             return False
         for x,y in self.unified:
             for a,b in other.unified:
-                if x==a and y!=b:
+                if x.eq(a) and not(y.eq(b)):
                     return False
         return True
 
