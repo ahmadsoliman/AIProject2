@@ -43,6 +43,13 @@ class node(object):
         # sanity check
         self.assert_consistency()
 
+    def __eq__(self, other):
+        if self.kind != other.kind or self.name != other.name or len(self.children) != len(other.children):
+            return False
+        for arg1,arg2 in itertools.izip(self.children, other.children):
+            if not (arg1 == arg2):
+                return False
+        return True
 
     def eq(self, other):
         if self.kind != other.kind or self.name != other.name or len(self.children) != len(other.children):
@@ -51,6 +58,23 @@ class node(object):
             if not arg1.eq(arg2):
                 return False
         return True
+
+    def sameFn(self, other):
+        return self.name == other.name and len(self.children) == len(other.children)
+
+    def posOf(self):
+        if self.kind == '~':
+            return self.children[0]
+        return self
+
+    def isNotOf(self, other):
+        if self.kind == '~':
+            if other.kind == '~':
+                return False
+            return other.isNotOf(self)
+        if other.kind != '~':
+            return False
+        return self.sameFn(other.children[0])
 
     def assert_consistency(self):
         if not self.is_consistent():
@@ -115,4 +139,5 @@ def E(*args): return node('E', *args)
 def var(name): return node('var', name)
 def const(name): return node('const', name)
 def fn(*args): return node('fn', *args)
+def neg(*args): return node('~', *args)
 def infix(c1, kind, c2): return node(kind, c1, c2)

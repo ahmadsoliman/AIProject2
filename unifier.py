@@ -2,9 +2,11 @@ import itertools
 from node import *
 
 class solution:
-    def __init__(self, f):
+    def __init__(self, f, unified=None):
+        if unified is None:
+            unified = set([])
+        self.unified = unified
         self.found = f
-        self.unified = set([])
 
     def __repr__(self):
         if not self.found:
@@ -13,6 +15,25 @@ class solution:
         for pair in self.unified:
             res += "\n%s = %s" % pair
         return res
+
+    def clone(self):
+        return solution(self.found, set([(p[0].clone(), p[1].clone()) for p in self.unified]))
+
+    def merge(self, other):
+        if not self.found or not other.found:
+            return False
+        self.unified |= other.unified
+        return True
+
+    def consistent(self, other):
+        if self.found != other.found:
+            return False
+        for x,y in self.unified:
+            for a,b in other.unified:
+                if x.eq(a) and not(y.eq(b)):
+                    return False
+        return True
+
 
 def unify(fol1, fol2, curSol = None):
     if curSol is None:
@@ -107,11 +128,3 @@ tests.append([
         fn('g',
             fn('g', var('z'))),
             var('z'))])
-
-for test in tests:
-    print "Unifying %s with %s" % tuple(test)
-    res = unify(*test)
-    print "Result: %s\n" % res
-
-def Unify(fol1, fol2):
-    unify(fol1, fol2, None)
