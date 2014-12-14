@@ -12,7 +12,10 @@ class action:
     def __repr__(self):
         return self.name.__repr__()
     def __eq__(self, other):
-        return self.name.eq(other.name) and arrayEq(sorted(self.preconds), sorted(other.preconds)) and arrayEq(sorted(self.effects), sorted(other.preconds))
+        ret = self.name.eq(other.name) and\
+                arrayEq(sorted(self.preconds), sorted(other.preconds)) and\
+                arrayEq(sorted(self.effects), sorted(other.effects))
+        return ret
     def __ne__(self, other):
         return not(self.eq(other))
     #def __hash__(self):
