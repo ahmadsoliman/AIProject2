@@ -196,49 +196,59 @@ def consistentOrder(pairs):
         if x not in graph[y]: graph[y].append(x)
     return dfs(graph, set([]), 0, -1)
 
-def dfs(graph, vis, n, p):
-    if n in vis:
+def linearize(plan):
+    nodes = [a.name for a in plan[0]]
+    edges = [(a[0].name, a[1].name) for a in plan[2]]
+    bindings = plan[3]
+    for i, n in enumerate(nodes):
+        for j in xrange(5):
+            nodes[i] = subst(bindings, n)
+    for i, e in enumerate(edges):
+        for j in xrange(5):
+            e0 = subst(bindings, e[0])
+            e1 = subst(bindings, e[1])
+            edges[i] = (e0, e1)
+
+    return top_sort(nodes, edges)
+
+
+def top_sort(nodes, edges):
+    def has_in_edges(end):
+        for e in edges:
+            if e[1] == end:
+                return True
         return False
-    vis.add(n)
-    for adj in graph[n]:
-        if adj != p:
-            if not dfs(graph, vis, adj, n):
-                return False
-    return True
 
+    starts = []
+    for i, n in enumerate(nodes):
+        if not has_in_edges(n):
+            starts.append(n)
+            del nodes[i]
 
-def linearize(pairs, sol):
-    nodec = 0
-    nodem = []
-    for a,b in pairs:
-        if a.name not in nodem:
-            nodem.append(a.name)
-        if b.name not in nodem:
-            nodem.append(b.name)
-    graph = [[]]*len(nodem)
-    for a,b in pairs:
-        x=nodem.index(a.name)
-        y=nodem.index(b.name)
-        if y not in graph[x]: graph[x].append(y)
-        if x not in graph[y]: graph[y].append(x)
-    global a0
-    res = []
-    top_sort(graph, set([]), nodem.index(a0.name), res)
-    items = []
-    res = reversed(res)
-    for item in res:
-        nodem[item] = subst(sol, nodem[item])
-        nodem[item] = subst(sol, nodem[item])
-        nodem[item] = subst(sol, nodem[item])
-        items.append(nodem[item])
-    return items
+    sorting = []
+    while len(starts):
+        n = starts.pop()
+        sorting.append(n)
 
-def top_sort(graph, vis, node, res):
-    vis.add(node)
-    for adj in graph[node]:
-        if not adj in vis:
-            top_sort(graph, vis, adj, res)
-    res.append(node)
+        once_more = True
+        while once_more:
+            once_more = False
+            for i, e in enumerate(edges):
+                if e[0] == n:
+                    del edges[i]
+                    if not has_in_edges(e[1]):
+                        starts.append(e[1])
+                    once_more = True
+
+    if len(edges) > 0:
+        print "CYCLE!"
+        print "Remaining edges:"
+        print edges
+        print "Current sorting: ", sorting
+
+        raise Exception("Graph was cyclic!")
+
+    return sorting
 
 # test
 
@@ -273,4 +283,4 @@ for p in plan:
     print p
     print
 
-print linearize(plan[2], plan[3])
+print linearize(plan)
