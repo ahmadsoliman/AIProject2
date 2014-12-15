@@ -158,7 +158,7 @@ def RESOLVE_THREATS(PI, al, l):
     A, L, Ord, B = PI
     for ak in A:
         for ai, pij, aj in L:
-            if ak==al or (ai, pij, aj)==l:
+            if ak == al or (ai, pij, aj) == l:
                 sol = None
                 for effect in ak.effects:
                     if effect.isNotOf(pij):
@@ -166,7 +166,7 @@ def RESOLVE_THREATS(PI, al, l):
                         if not sol.consistent(B):
                             sol = None
                             continue
-                        Ord1 = [(l[0].clone(False), l[1].clone(False)) for l in Ord]
+                        Ord1 = [(o[0].clone(False), o[1].clone(False)) for o in Ord]
                         if (ai, ak) not in Ord:
                             Ord1.append((ai, ak))
                         if (ak, aj) not in Ord:
