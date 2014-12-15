@@ -287,10 +287,25 @@ O = [
         )
 ]
 
+print "Start State"
+print s0
+print "Goal State"
+print g
+print "Operators"
+print O
+
+print "\n\nPlanning....\n\n"
+
 plan = POP(O, s0, g)
 
-for p in plan:
-    print p
-    print
+print "Actions"
+print plan[0]
+print "\nLinks"
+print plan[1]
+print "\nOrdering"
+print plan[2]
+print "\nBindings"
+print plan[3]
 
-print linearize(plan)
+print "\n\nLinearizing....\n\n"
+print "Linear Plan: ", linearize(plan)
