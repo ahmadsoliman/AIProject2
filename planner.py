@@ -149,8 +149,8 @@ def POP1(PI, agenda):
                     for precond in aj.preconds:
                         agenda.append((aj, precond))
                 # resolve new threats
-                #PI = RESOLVE_THREATS((A, L, Ord, B), aj, (aj, pi, ai))
-                resPI = POP1((A, L, Ord, B), agenda)
+                PI = RESOLVE_THREATS((A, L, Ord, B), aj, (aj, pi, ai))
+                resPI = POP1(PI, agenda)
                 if resPI is not None: return resPI
 
 def RESOLVE_THREATS(PI, al, l):
@@ -179,6 +179,16 @@ def RESOLVE_THREATS(PI, al, l):
                     if (ak, ai) not in Ord:
                         Ord.append((ak, ai))
     return (A, L, Ord, B)
+
+def dfs(graph, vis, n, p):
+    if n in vis:
+        return False
+    vis.add(n)
+    for adj in graph[n]:
+        if adj != p:
+            if not dfs(graph, vis, adj, n):
+                return False
+    return True
 
 def consistentOrder(pairs):
     nodec = 0
